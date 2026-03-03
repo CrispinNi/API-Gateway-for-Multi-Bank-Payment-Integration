@@ -5,6 +5,7 @@ from app.models import Transaction
 from app.auth import get_current_user
 from app.rate_limit import check_rate_limit
 from app.redis_client import redis_client
+from app.kafka_producer import send_payment_event
 import uuid
 
 router = APIRouter()
@@ -51,6 +52,14 @@ def create_payment(
         transaction.reference,
         ex=3600
     )
+    
+    send_payment_event({
+        "reference": transaction.reference,
+        "bank_name": bank_name,
+        "amount": amount,
+        "currency": currency
+    })
+    
 
     return {
         "message": "Payment initiated",
