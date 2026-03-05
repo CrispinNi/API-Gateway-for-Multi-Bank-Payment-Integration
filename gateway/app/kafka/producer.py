@@ -6,6 +6,6 @@ producer = KafkaProducer(
     value_serializer=lambda v: json.dumps(v).encode("utf-8")
 )
 
-def send_payment_event(data: dict):
-    producer.send("payment_requests", data)
-    producer.flush()
+def publish_payment_event(event):
+
+    producer.send("payments.created", event)

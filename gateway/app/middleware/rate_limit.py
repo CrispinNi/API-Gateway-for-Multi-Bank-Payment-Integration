@@ -1,21 +1,16 @@
+import redis
 from fastapi import HTTPException
-from app.redis_client import redis_client
-import time
 
-RATE_LIMIT = 10  # requests
-WINDOW_SIZE = 60  # seconds
+r = redis.Redis(host="redis", port=6379, decode_responses=True)
 
-def check_rate_limit(user_id: str):
-    key = f"rate_limit:{user_id}"
-    current = redis_client.get(key)
+def rate_limit(client_id):
 
-    if current and int(current) >= RATE_LIMIT:
-        raise HTTPException(status_code=429, detail="Rate limit exceeded")
+    key = f"rate:{client_id}"
 
-    pipe = redis_client.pipeline()
-    pipe.incr(key, 1)
+    count = r.incr(key)
 
-    if not current:
-        pipe.expire(key, WINDOW_SIZE)
+    if count == 1:
+        r.expire(key, 60)
 
-    pipe.execute()
+    if count > 100:
+        raise HTTPException(429, "Rate limit exceeded")

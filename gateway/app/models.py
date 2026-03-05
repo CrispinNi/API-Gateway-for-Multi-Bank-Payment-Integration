@@ -3,6 +3,9 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
 import uuid
 from app.database import Base
+from sqlalchemy.orm import declarative_base
+
+Base = declarative_base()
 
 class User(Base):
     __tablename__ = "users"
@@ -25,3 +28,13 @@ class Transaction(Base):
     status = Column(String, default="pending")
     reference = Column(String)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class Payment(Base):
+    __tablename__ = "payments"
+
+    id = Column(Integer, primary_key=True)
+    amount = Column(Float)
+    currency = Column(String)
+    bank = Column(String)
+    status = Column(String)
