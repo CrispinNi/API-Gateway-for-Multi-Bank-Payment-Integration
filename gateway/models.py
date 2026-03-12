@@ -1,11 +1,9 @@
-from sqlalchemy import Column, String, Float, DateTime
+from sqlalchemy import Column, String, Float, DateTime, Integer
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
 import uuid
-from app.database import Base
-from sqlalchemy.orm import declarative_base
+from database import Base
 
-Base = declarative_base()
 
 class User(Base):
     __tablename__ = "users"

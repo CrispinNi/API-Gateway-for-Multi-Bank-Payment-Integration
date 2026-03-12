@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, Header, HTTPException
 from sqlalchemy.orm import Session
-from app.database import SessionLocal
-from app.models import Transaction
-from app.auth import get_current_user
-from app.rate_limit import check_rate_limit
-from app.redis_client import redis_client
-from app.kafka_producer import send_payment_event
+from database import SessionLocal
+from models import Transaction
+from auth import get_current_user
+from rate_limit import check_rate_limit
+from redis_client import redis_client
+from kafka_producer import send_payment_event
 import uuid
 
 router = APIRouter()

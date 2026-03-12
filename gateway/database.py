@@ -1,7 +1,9 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from .config import DATABASE_URL
+from sqlalchemy.orm import sessionmaker, declarative_base
+from config import DATABASE_URL
 import time
+
+Base = declarative_base()
 
 for i in range(10):
     try:
@@ -13,4 +15,4 @@ for i in range(10):
         print("Waiting for database...")
         time.sleep(3)
 
-SessionLocal = sessionmaker(bind=engine)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

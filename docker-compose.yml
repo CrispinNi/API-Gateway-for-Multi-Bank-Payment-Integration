@@ -1,40 +1,49 @@
 version: "5.0.2"
 
 services:
-
   postgres:
     image: postgres:15
     container_name: postgres
     environment:
-      POSTGRES_USER: fintech
-      POSTGRES_PASSWORD: fintech123
-      POSTGRES_DB: payments_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: payments
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
 
+  gateway1:
+    build: ./gateway
+    depends_on:
+      - kafka
+  gateway2:
+    build: ./gateway
+    depends_on:
+      - kafka
+
+  gateway3:
+    build: ./gateway
+    depends_on:
+      - kafka
+  nginx:
+    image: nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "80:80"
+    depends_on:
+      - gateway1
+      - gateway2
+      - gateway3
+
   redis:
-    image: redis:7
-    container_name: redis
+    image: redis
     ports:
       - "6379:6379"
-
-  gateway:
-    build: ./gateway
-    container_name: gateway
-    depends_on:
-      - postgres
-      - redis
-    ports:
-      - "8000:8000"
-    environment:
-      DATABASE_URL: postgresql://fintech:fintech123@postgres:5432/payments_db
-      REDIS_HOST: redis
-  
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.0
     environment:
@@ -47,12 +56,10 @@ services:
     ports:
       - "9092:9092"
     environment:
+      KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-
-  transaction_processor:
-    build: ./transaction_processor
-    depends_on:
-      - kafka
-      - postgres
