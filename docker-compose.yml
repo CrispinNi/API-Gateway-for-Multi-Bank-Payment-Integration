@@ -18,16 +18,35 @@ services:
 
   gateway1:
     build: ./gateway
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/payments
+      - REDIS_HOST=redis
+      - KAFKA_SERVER=kafka:9092
     depends_on:
+      - postgres
+      - redis
       - kafka
+
   gateway2:
     build: ./gateway
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/payments
+      - REDIS_HOST=redis
+      - KAFKA_SERVER=kafka:9092
     depends_on:
+      - postgres
+      - redis
       - kafka
 
   gateway3:
     build: ./gateway
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/payments
+      - REDIS_HOST=redis
+      - KAFKA_SERVER=kafka:9092
     depends_on:
+      - postgres
+      - redis
       - kafka
   nginx:
     image: nginx
@@ -63,3 +82,22 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  bank_a:
+    build: ./bank_a_adapter
+
+  fraud_service:
+    build: ./fraud_service
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+  db-init:
+    build: ./gateway
+    command: python init_db.py
+    depends_on:
+      - postgres

@@ -9,3 +9,4 @@ redis
 pydantic
 kafka-python
 PyJWT
+prometheus-fastapi-instrumentator
